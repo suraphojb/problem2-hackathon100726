@@ -1,0 +1,501 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Big Boss Project — Evidence-aware routes home</title>
+<style>
+:root{--bg:#F4F6FA;--card:#fff;--line:#DDE3EC;--ink:#14243A;--mut:#5B6B82;--blue:#2563EB;--teal:#0F9488;--amber:#B45309;--amberL:#F59E0B;--red:#DC2626;--gray:#94A3B8;--r:12px}
+*{box-sizing:border-box}
+html,body{overflow-x:hidden}
+body{margin:0;background:var(--bg);color:var(--ink);font:15.5px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+button,select,input,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+header{display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px;padding:14px 24px;background:#fff;border-bottom:1px solid var(--line)}
+header h1{margin:0;font-size:20px;letter-spacing:-.01em}
+header p{margin:0;color:var(--mut);font-size:14px}
+.badge{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;padding:4px 10px;border-radius:999px;border:1px solid}
+.b-sim{background:#FFF7ED;border-color:#FDBA74;color:#9A3412}
+.b-ai{background:#EEF2FF;border-color:#C7D2FE;color:#3730A3}
+.hdr-right{margin-left:auto;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.wrap{max-width:1440px;margin:0 auto;padding:16px 24px 48px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:0 1px 2px rgba(20,36,58,.05)}
+.controls{display:flex;flex-wrap:wrap;gap:12px 18px;align-items:end;padding:12px 16px}
+.field{display:flex;flex-direction:column;gap:3px;font-size:13px;color:var(--mut);font-weight:600}
+.field select,.field input,.field textarea{min-width:0;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;font-size:15px;font-weight:400;color:var(--ink)}
+.toggle{display:flex;align-items:center;gap:8px;font-size:14.5px;font-weight:600;padding:8px 0;cursor:pointer}
+.toggle input{width:18px;height:18px;accent-color:var(--blue)}
+.demo{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:12px 16px;margin-top:12px}
+.clock{font-variant-numeric:tabular-nums;font-weight:700;padding:6px 12px;border-radius:8px;background:#EEF2F7}
+.next-desc{flex:1 1 260px;color:var(--mut);font-size:14px}
+.btn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:8px 14px;font-weight:600;cursor:pointer;font-size:14.5px}
+.btn:hover{border-color:#B8C3D3}
+.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn.primary:hover{background:#1D4ED8}
+.btn.primary:disabled{background:#93B4F5;border-color:#93B4F5;cursor:default}
+.btn.sm{padding:5px 10px;font-size:13.5px}
+.btn.on{background:#14243A;color:#fff;border-color:#14243A}
+.main{display:grid;grid-template-columns:minmax(0,65fr) minmax(0,35fr);gap:16px;margin-top:16px;align-items:start}
+.mapcard{padding:14px 16px}
+.cardhead{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:6px 12px;margin-bottom:8px}
+.cardhead h2{margin:0;font-size:17px}
+.disclaim{font-size:13px;color:var(--mut);font-weight:600}
+svg{width:100%;height:auto;display:block}
+.seg{cursor:pointer}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13.5px;color:var(--mut);margin-top:6px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{display:inline-block;width:26px;height:0;border-top-width:5px;border-top-style:solid}
+.summary{margin-top:14px;padding:14px 16px;border-radius:10px;background:#F8FAFD;border:1px solid var(--line)}
+.summary h3{margin:0 0 6px;font-size:16px}
+.costs{display:flex;flex-wrap:wrap;gap:8px 22px;font-size:14px;color:var(--mut);margin-top:8px}
+.costs b{color:var(--ink);font-variant-numeric:tabular-nums}
+.empty{border-color:#FCA5A5;background:#FEF2F2}
+.side{display:flex;flex-direction:column;gap:16px}
+.feed{padding:14px 16px}
+.inc{display:block;width:100%;text-align:left;border:1px solid var(--line);border-left:5px solid var(--gray);background:#fff;border-radius:10px;padding:10px 12px;margin-top:8px;cursor:pointer}
+.inc:hover{border-color:#B8C3D3}
+.inc.sel{box-shadow:0 0 0 2px var(--blue)}
+.inc .t{font-weight:700;display:flex;justify-content:space-between;gap:8px}
+.inc .s{font-size:13.5px;color:var(--mut)}
+.prio{font-size:12.5px;font-weight:700;padding:2px 8px;border-radius:6px;background:#EEF2F7;white-space:nowrap}
+.P1{background:#FEE2E2;color:#991B1B}.P2{background:#FEF3C7;color:#92400E}.P3{background:#E0E7FF;color:#3730A3}
+.st{display:inline-flex;align-items:center;gap:5px;font-weight:700;font-size:13.5px}
+.st-reported,.st-conflicting{color:var(--amber)}.st-corroborated{color:var(--teal)}.st-confirmed{color:var(--red)}.st-resolved{color:#64748B}
+.bl-reported,.bl-conflicting{border-left-color:var(--amberL)!important}.bl-corroborated{border-left-color:var(--teal)!important}.bl-confirmed{border-left-color:var(--red)!important}.bl-resolved{border-left-color:#CBD5E1!important}
+.ev{padding:14px 16px}
+.ev h3{margin:0 0 2px;font-size:16px}
+.ev .lead{margin:8px 0 10px;padding:10px 12px;background:#F8FAFD;border-radius:8px;border:1px solid var(--line)}
+.ev dl{display:grid;grid-template-columns:128px 1fr;gap:6px 12px;margin:0;font-size:14.5px}
+.ev dt{color:var(--mut);font-weight:600}.ev dd{margin:0}
+.src{font-size:13.5px;margin:2px 0}
+.src i{font-style:normal;color:var(--mut)}
+.muted{color:var(--mut);font-size:14px}
+.lower{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;margin-top:16px}
+.pad{padding:14px 16px}
+.pad h2{margin:0 0 8px;font-size:17px}
+form .row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+form textarea{width:100%;resize:vertical;min-height:58px}
+.err{color:var(--red);font-size:13.5px;font-weight:600;min-height:1.2em;margin-top:6px}
+.queue-item{border:1px dashed #F59E0B;border-radius:8px;padding:8px 10px;margin-top:8px;font-size:14px;background:#FFFBEB}
+details.trace{margin-top:16px}
+details.trace summary{cursor:pointer;padding:14px 16px;font-weight:700;font-size:16px}
+.steps{list-style:none;margin:0;padding:0 16px 14px;counter-reset:s}
+.steps li{display:grid;grid-template-columns:30px 170px 1fr;gap:10px;padding:9px 0;border-top:1px solid var(--line);font-size:14.5px}
+.steps li:before{counter-increment:s;content:counter(s);width:24px;height:24px;border-radius:50%;background:#E8EEF8;color:var(--blue);font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center}
+.steps b{font-weight:700}
+.log{max-height:260px;overflow:auto;font-size:13.5px}
+.log table{width:100%;border-collapse:collapse}
+.log td,.log th{padding:6px 8px;border-top:1px solid var(--line);text-align:left;vertical-align:top}
+.log th{position:sticky;top:0;background:#fff;color:var(--mut);font-size:12.5px}
+.note{font-size:13px;color:var(--mut)}
+.persist{font-size:12.5px;color:var(--amber)}
+/* presentation mode */
+body.present .secondary{display:none!important}
+body.present .main{grid-template-columns:minmax(0,72fr) minmax(0,28fr)}
+body.present .summary{font-size:17px}
+body.present .summary h3{font-size:19px}
+@media(max-width:900px){
+ .wrap{padding:12px 16px 40px}header{padding:12px 16px}
+ .main,.lower,body.present .main{grid-template-columns:minmax(0,1fr)}
+ .steps li{grid-template-columns:30px 1fr}.steps li span:last-child{grid-column:2}
+ .ev dl{grid-template-columns:1fr}.ev dt{margin-top:4px}
+ form .row{grid-template-columns:1fr}
+ .hdr-right{margin-left:0}
+}
+.pipe{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.pipe span{font-size:12.5px;font-weight:600;padding:4px 8px;border-radius:6px;background:#EEF2F7;color:var(--mut)}
+.pipe span.done{background:#DBEAFE;color:#1E40AF}
+.pipe i{color:#94A3B8;font-style:normal;font-size:12px}
+.along{border:1px solid var(--line);border-left:5px solid var(--gray);border-radius:10px;padding:10px 12px;margin-top:8px;cursor:pointer;background:#fff;display:block;width:100%;text-align:left;font-size:14px}
+.along.sel{box-shadow:0 0 0 2px var(--blue)}
+.along .row1{display:flex;justify-content:space-between;gap:8px;font-weight:700;font-size:15px}
+.along dl{display:grid;grid-template-columns:96px 1fr;gap:2px 10px;margin:6px 0 0}
+.along dt{color:var(--mut);font-weight:600}.along dd{margin:0}
+.flagu{color:var(--amber);font-weight:600}
+.adapter{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid var(--line);font-size:14px}
+.presenter{position:fixed;right:16px;bottom:16px;z-index:20;padding:12px 14px;max-width:min(420px,calc(100vw - 32px));box-shadow:0 8px 24px rgba(20,36,58,.18)}
+.presenter[hidden]{display:none}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style></head><body>
+<header>
+ <div><h1>Big Boss Project</h1><p>Evidence-aware routes home</p></div>
+ <span class="badge b-sim">⚑ Simulated scenario — fictional sources &amp; events</span>
+ <span class="badge b-ai">Prototype decision engine; AI extraction simulated</span>
+ <div class="hdr-right"><button class="btn sm" id="presBtn" onclick="togglePresent()">Presentation mode</button></div>
+</header>
+<div class="wrap">
+ <section class="card controls" aria-label="Journey">
+  <label class="field">Origin<select id="origin" onchange="setPref('origin',+this.value)"></select></label>
+  <label class="field">Destination<select id="dest" onchange="setPref('dest',+this.value)"></select></label>
+  <label class="field">Travel mode<select id="mode" onchange="setPref('mode',this.value)"><option value="walking">Walking</option><option value="driving">Driving</option></select></label>
+  <label class="toggle"><input type="checkbox" id="avoid" onchange="setPref('avoid',this.checked)"> Avoid uncertain reports</label>
+ </section>
+
+ <section class="card demo" aria-label="Agent pipeline status">
+  <span class="clock" title="Simulated scenario clock">Scenario clock <span id="clock"></span></span>
+  <div class="pipe" id="pipe" aria-label="Agent pipeline stages"></div>
+  <span class="next-desc" id="nextDesc"></span>
+ </section>
+
+ <div class="main">
+  <section class="card mapcard">
+   <div class="cardhead"><h2>Route network</h2><span class="disclaim">Schematic demo network — not real navigation</span></div>
+   <svg id="map" viewBox="0 0 820 460" role="img" aria-label="Schematic street network with current route"></svg>
+   <div class="legend">
+    <b style="color:var(--ink)">Congestion</b>
+    <span><i class="sw" style="border-color:#16A34A"></i>Low</span>
+    <span><i class="sw" style="border-color:#F59E0B"></i>Moderate</span>
+    <span><i class="sw" style="border-color:#EF4444"></i>High</span>
+    <span><i class="sw" style="border-color:#CBD5E1"></i>Unknown / stale</span>
+    <span id="congLegend" class="note"></span>
+   </div>
+   <div class="legend">
+    <b style="color:var(--ink)">Route &amp; incidents</b>
+    <span><i class="sw" style="border-color:var(--blue);box-shadow:0 0 0 2px #fff,0 0 0 3px #CBD5E1"></i>Recommended route</span>
+    <span><i class="sw" style="border-color:#64748B;border-top-style:dotted"></i>Original route</span>
+    <span><b style="color:#fff;background:#B91C1C;border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:12px">✕</b>CLOSED (confirmed)</span>
+    <span><b style="color:#B45309;border:2px dashed #B45309;border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:12px">?</b>UNVERIFIED report</span>
+   </div>
+   <div class="summary" id="summary"></div>
+  </section>
+  <aside class="side">
+   <section class="card feed" aria-label="Along your route"><div class="cardhead"><h2>Along your route</h2><span class="note">Detected by agents · priority, then order along route</span></div><div id="along"></div></section>
+   <section class="card ev" id="evidence"></section>
+   <section class="card feed"><div class="cardhead"><h2>Incident feed</h2><span class="note">Sorted by priority</span></div><div id="feed"></div></section>
+  </aside>
+ </div>
+
+ <details class="card trace" open><summary>Decision trace — seven steps for the selected incident</summary><ol class="steps" id="trace"></ol></details>
+
+ <div class="lower secondary">
+  <section class="card pad">
+   <h2>Source collectors</h2>
+   <p class="note" style="margin:0 0 6px">No live connectors are configured in this prototype. Agents run the simulated adapters below automatically. Nothing here is live collection.</p>
+   <div id="adapters"></div>
+  </section>
+  <section class="card pad">
+   <h2>Agent review queue</h2>
+   <p class="note" style="margin:0">Reports the extraction agent couldn't place on a known segment. They are held for re-collection and never block a guessed street.</p>
+   <div id="queue"></div>
+  </section>
+ </div>
+
+ <section class="card pad secondary" style="margin-top:16px">
+  <div class="cardhead"><h2>Decision log</h2><span class="persist" id="persist"></span></div>
+  <div class="log"><table><thead><tr><th>Time</th><th>Incident</th><th>Change</th><th>Evidence</th><th>Route effect</th><th>Reason</th></tr></thead><tbody id="log"></tbody></table></div>
+ </section>
+</div>
+<div class="card presenter" id="presenter" hidden>
+ <b>Presenter controls</b> <span class="note">· not part of the user UI · toggle with Shift+P or #presenter</span>
+ <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px">
+  <button class="btn sm" id="pauseBtn" onclick="togglePause()">Pause agents</button>
+  <button class="btn sm" onclick="resetDemo()">Restart scenario</button>
+  <button class="btn sm" id="exitsBtn" onclick="toggleExits()">Block all exits scenario</button>
+ </div>
+</div>
+<script>
+/* ===== Network: fictional 4×3 schematic grid ===== */
+const COLS=['Ash','Birch','Cedar','Dock'],ROWS=['North','Center','South'];
+const NODES=[];for(let r=0;r<3;r++)for(let c=0;c<4;c++)NODES.push({i:r*4+c,r,c,x:110+200*c,y:80+150*r,name:`${COLS[c]} Ave & ${ROWS[r]} St`});
+NODES[0].name+=' (Arena)';NODES[11].name+=' (Home)';
+const SEGS=[];
+for(let r=0;r<3;r++)for(let c=0;c<3;c++)SEGS.push({id:`${ROWS[r].slice(0,3).toUpperCase()}-${COLS[c][0]}${COLS[c+1][0]}`,a:r*4+c,b:r*4+c+1,cost:r===1?2:4,name:`${ROWS[r]} St, ${COLS[c]}–${COLS[c+1]}`,h:1});
+for(let c=0;c<4;c++)for(let r=0;r<2;r++)SEGS.push({id:`${COLS[c].slice(0,3).toUpperCase()}-${ROWS[r][0]}${ROWS[r+1][0]}`,a:r*4+c,b:(r+1)*4+c,cost:3,name:`${COLS[c]} Ave, ${ROWS[r]}–${ROWS[r+1]}`,h:0});
+const SEG=Object.fromEntries(SEGS.map(s=>[s.id,s]));
+const DEMO_SEG='CEN-BC';
+/* Simulated authority registry — only built-in fictional sources can be authoritative */
+const AUTHORITIES={'demo-city-dot':'Demo City DOT (fictional)'};
+const WINDOW=15; // demo rule: 15-minute observation/freshness window
+const fmt=m=>m==null?'unknown':`${String(Math.floor(m/60)%24).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`;
+
+/* ===== Demo script ===== */
+const T0=21*60+30;
+function R(o){return Object.assign({sourceReference:'',sourceIdentity:'',effectiveFrom:null,effectiveUntil:null,validationFlags:[],builtIn:true,travelMode:'all'},o)}
+const ADAPTERS={social:'Simulated social feed adapter',alerts:'Simulated city alert adapter',congestion:'Simulated traffic-probe adapter (congestion)'};
+const CONG_BASE={'NOR-AB':.5,'NOR-BC':.75,'NOR-CD':.8,'CEN-AB':.55,'CEN-BC':.45,'CEN-CD':.72,'SOU-AB':.85,'SOU-BC':.8,'SOU-CD':.76,'ASH-NC':.62,'ASH-CS':.8,'BIR-NC':.6,'BIR-CS':.86,'CED-NC':.7,'CED-CS':.8,'DOC-NC':.82,'DOC-CS':.68};
+const NO_SENSOR=['NOR-CD'],SENSOR_STOPS={'SOU-AB':0};
+/* Simulated traffic-probe adapter: speed as a fraction of free-flow speed (fictional values). Not derived from post counts. */
+function congBatch(step,at){const out=[];for(const s of SEGS){if(NO_SENSOR.includes(s.id))continue;if(s.id in SENSOR_STOPS&&step>SENSOR_STOPS[s.id])continue;
+ const near=[0,1,4].some(n=>s.a===n||s.b===n);const r=Math.max(.15,Math.min(.95,CONG_BASE[s.id]-(near?.07*step:0)-(s.id==='DOC-CS'?.04*step:0)));
+ out.push({segId:s.id,speedRatio:+r.toFixed(2),observedAt:at,sourceId:'sim-probe',underlyingSourceId:`probe-${s.id}-${step}`})}
+ if(out.length)out.push({...out[0],sourceId:'sim-probe-mirror'});return out}
+function congestion(){const seen=new Set(),by={};let dup=0,upd=null;
+ for(const c of S.cong||[]){if(seen.has(c.underlyingSourceId)){dup++;continue}seen.add(c.underlyingSourceId);if(!by[c.segId]||by[c.segId].observedAt<=c.observedAt)by[c.segId]=c;upd=Math.max(upd??0,c.observedAt)}
+ return{by,dup,upd}}
+function congLevel(c){if(!c)return'unknown';if(S.clock-c.observedAt>WINDOW)return'stale';return c.speedRatio>=.7?'low':c.speedRatio>=.4?'moderate':'high'}
+const CONG_COLOR={low:'#16A34A',moderate:'#F59E0B',high:'#EF4444',unknown:'#CBD5E1',stale:'#CBD5E1'};
+const CONG_TEXT=c=>{const l=congLevel(c);return l==='unknown'?'Unknown — no sensor reading for this segment':l==='stale'?`Stale — last simulated reading ${fmt(c.observedAt)} (older than 15 min)`:`${l[0].toUpperCase()+l.slice(1)} — simulated probe speed ${Math.round(c.speedRatio*100)}% of free-flow at ${fmt(c.observedAt)}`};
+const SCRIPT=[
+ {at:T0+2,adapter:'social',label:'Public post reports a blockage',reports:[R({id:'R1',originalText:'Center St between Birch and Cedar is totally blocked — crowd everywhere after the win!',sourceType:'public',sourceReference:'@ParadeCam_demo (fictional)',sourceIdentity:'ParadeCam_demo',underlyingSourceId:'post-881',segmentIds:[DEMO_SEG],incidentType:'blockage'})]},
+ {at:T0+4,adapter:'social',label:'Duplicate repost of the same post',reports:[R({id:'R2',originalText:'RT: Center St between Birch and Cedar is totally blocked — crowd everywhere after the win!',sourceType:'public',sourceReference:'@RepostBot_demo (fictional)',sourceIdentity:'RepostBot_demo',underlyingSourceId:'post-881',segmentIds:[DEMO_SEG],incidentType:'blockage'})]},
+ {at:T0+5,adapter:'social',label:'Vague post with no usable street',reports:[R({id:'R-A1',originalText:'Streets near the arena are a mess, avoid the area!!',sourceType:'public',sourceReference:'@hoops_fan_demo (fictional)',sourceIdentity:'hoops_fan_demo',underlyingSourceId:'post-amb-1',segmentIds:[],incidentType:'blockage',travelMode:'unknown'})]},
+ {at:T0+8,adapter:'social',label:'Second, independent report agrees',reports:[R({id:'R3',originalText:'Police barricades across Center St at Birch, nobody getting through toward Cedar.',sourceType:'public',sourceReference:'@local_runner_demo (fictional)',sourceIdentity:'local_runner_demo',underlyingSourceId:'post-902',segmentIds:[DEMO_SEG],incidentType:'blockage'})]},
+ {at:T0+11,adapter:'alerts',label:'Simulated official closure notice',reports:[R({id:'R4',originalText:'DEMO ALERT: Center St closed between Birch Ave and Cedar Ave to all traffic and pedestrians for celebration crowd control.',sourceType:'official',sourceReference:'Demo City DOT alert #D-17 (fictional)',sourceIdentity:'demo-city-dot',underlyingSourceId:'dot-D17',segmentIds:[DEMO_SEG],incidentType:'blockage',effectiveFrom:T0+10})]},
+ {at:T0+17,adapter:'social',label:'Conflicting public report says it is open',reports:[R({id:'R5',originalText:'Center St Birch–Cedar looks open now?? walked past the corner',sourceType:'public',sourceReference:'@night_owl_demo (fictional)',sourceIdentity:'night_owl_demo',underlyingSourceId:'post-950',segmentIds:[DEMO_SEG],incidentType:'clear'})]},
+ {at:T0+25,adapter:'alerts',label:'Simulated official reopening notice',reports:[R({id:'R6',originalText:'DEMO ALERT: Center St between Birch Ave and Cedar Ave has reopened to all traffic.',sourceType:'official',sourceReference:'Demo City DOT alert #D-21 (fictional)',sourceIdentity:'demo-city-dot',underlyingSourceId:'dot-D21',segmentIds:[DEMO_SEG],incidentType:'reopening',effectiveFrom:T0+25})]},
+ {at:T0+27,adapter:'alerts',label:'Simulated driving-only closure',reports:[R({id:'R-DRV',originalText:'DEMO ALERT: Dock Ave between Center St and South St closed to vehicles. Sidewalks remain open to pedestrians.',sourceType:'official',sourceReference:'Demo City DOT alert #D-19 (fictional)',sourceIdentity:'demo-city-dot',underlyingSourceId:'dot-D19',segmentIds:['DOC-CS'],incidentType:'blockage',travelMode:'driving',effectiveFrom:T0+27})]}
+];
+
+/* ===== State + persistence ===== */
+const KEY='bigboss-route-v3';try{localStorage.removeItem('bigboss-route-v1')}catch(e){}let canPersist=true;
+function fresh(){return{v:3,cong:congBatch(0,T0),collected:{congestion:SEGS.length-NO_SENSOR.length},lastRun:null,paused:false,clock:T0,step:0,reports:[],log:[],origin:0,dest:11,mode:'walking',avoid:false,sel:null,exits:false,prev:{},prevRoute:null,n:0}}
+let S;try{const sv=JSON.parse(localStorage.getItem(KEY));S=sv&&sv.v===3?Object.assign(fresh(),sv):fresh()}catch(e){S=fresh();canPersist=false}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){canPersist=false}}
+
+/* ===== Step 1: extract & validate ===== */
+function validate(r){
+ const f=[];
+ const segs=(r.segmentIds||[]).filter(id=>SEG[id]);
+ if(!segs.length)f.push('ambiguous-location');
+ if(r.observedAt==null)f.push('observation-time-unknown');
+ if(r.travelMode==='unknown')f.push('mode-unknown');
+ if(r.claimedOfficial)f.push('unauthenticated-official-claim');
+ return f}
+const isAuth=r=>r.sourceType==='official'&&r.builtIn&&AUTHORITIES[r.sourceIdentity];
+const modeOk=(a,b)=>a===b||a==='all'||b==='all'||a==='unknown'||b==='unknown';
+
+/* ===== Step 2: match incidents ===== */
+function buildIncidents(){
+ const valid=S.reports.filter(r=>!r.validationFlags.includes('ambiguous-location')).sort((a,b)=>a.observedAt-b.observedAt);
+ const incs=[];
+ for(const r of valid){
+  const overlap=i=>i.segmentIds.some(s=>r.segmentIds.includes(s))&&modeOk(i.travelMode,r.travelMode);
+  if(r.incidentType==='clear'||r.incidentType==='reopening'){
+   const i=[...incs].reverse().find(overlap);
+   if(i){i.contra.push(r);i.match.push(`${r.id} linked to ${i.id}: same segment, ${r.incidentType==='reopening'?'reopening notice':'contradicting claim'}`)}
+   continue}
+  const i=incs.find(i=>overlap(i)&&i.incidentType===r.incidentType&&!i.contra.some(c=>isAuth(c)&&c.incidentType==='reopening')&&
+   (r.observedAt-i.last<=WINDOW||i.support.some(s=>s.effectiveFrom!=null&&s.effectiveUntil==null)));
+  if(i){i.support.push(r);i.last=Math.max(i.last,r.observedAt);i.match.push(`${r.id} matched ${i.id}: same segment, compatible claim and mode, within ${WINDOW} min`);if(i.travelMode==='unknown'||isAuth(r))i.travelMode=r.travelMode}
+  else incs.push({id:'INC-'+r.id.replace(/^R-?/,''),segmentIds:[...r.segmentIds],incidentType:r.incidentType,travelMode:r.travelMode,support:[r],contra:[],last:r.observedAt,match:[`${r.id} opened a new incident (no matching active incident)`]})}
+ return incs}
+const dedupe=list=>{const m=new Map();for(const r of list){const k=r.underlyingSourceId||r.id;if(!m.has(k))m.set(k,[]);m.get(k).push(r)}return[...m.entries()].map(([k,v])=>({key:k,first:v[0],copies:v}))};
+
+/* ===== Step 3: compare evidence ===== */
+function assess(i){
+ const now=S.clock,fr=r=>r.sourceType!=='public'||now-r.observedAt<=WINDOW;
+ const sup=dedupe(i.support),con=dedupe(i.contra);
+ const offClose=i.support.filter(isAuth),lastOff=offClose.length?Math.max(...offClose.map(r=>r.observedAt)):-1;
+ const reopen=i.contra.find(r=>isAuth(r)&&r.incidentType==='reopening'&&r.observedAt>=lastOff);
+ const opClear=i.contra.filter(r=>r.sourceType==='operator').find(r=>r.observedAt>=i.last);
+ const pubClear=con.filter(g=>g.first.sourceType==='public'&&fr(g.first));
+ const freshSup=sup.filter(g=>fr(g.first));
+ let status,note='';
+ if(reopen){status='resolved';note=`Matching official reopening notice (${reopen.id}, simulated authority) resolves this closure.`}
+ else if(opClear){status='resolved';note=`Resolved by operator verification (${opClear.id}) — this is an operator check, not an official notice.`}
+ else if(offClose.length){status='confirmed';note=pubClear.length?`A public report (${pubClear.map(g=>g.first.id).join(', ')}) says the street looks open, but it does not supersede the official closure: it is a single unverified source and the official notice has no end time. The closure stays in force; the disagreement is kept for review.`:'Matching notice from a simulated authenticated authority (Demo City DOT).'}
+ else if(pubClear.length&&freshSup.length){status='conflicting';note='Current public sources disagree about this street; neither side is authoritative.'}
+ else if(freshSup.length>=2){status='corroborated';note=`${freshSup.length} independent current sources agree. No official closure notice is available.`}
+ else{status='reported';note=freshSup.length?'One independent source so far. No official closure notice is available.':'Only reports older than 15 minutes remain. That makes them stale — it does not prove the street reopened.'}
+ const freshness=offClose.length||freshSup.length?'current':'stale';
+ return{status,note,sup,con,freshness}}
+
+/* ===== Routing ===== */
+function dijkstra(excl){
+ const dist=Array(12).fill(Infinity),prev=Array(12).fill(null),done=new Set();dist[S.origin]=0;
+ while(true){let u=-1;for(let k=0;k<12;k++)if(!done.has(k)&&dist[k]<Infinity&&(u<0||dist[k]<dist[u]))u=k;if(u<0)break;done.add(u);
+  for(const s of SEGS){if(excl.has(s.id))continue;const v=s.a===u?s.b:s.b===u?s.a:-1;if(v<0)continue;if(dist[u]+s.cost<dist[v]){dist[v]=dist[u]+s.cost;prev[v]={n:u,s:s.id}}}}
+ if(dist[S.dest]===Infinity)return null;
+ const segs=[],nodes=[S.dest];let c=S.dest;while(prev[c]){segs.unshift(prev[c].s);c=prev[c].n;nodes.unshift(c)}
+ return{segs,nodes,cost:dist[S.dest]}}
+
+/* ===== Steps 4–6: relevance, priority, route update ===== */
+function evaluate(){
+ const incs=buildIncidents();
+ for(const i of incs)Object.assign(i,assess(i));
+ const original=S.origin===S.dest?null:dijkstra(new Set());
+ // Step 6: exclusions (depend on evidence + mode only)
+ const excl=new Map();
+ for(const i of incs){
+  if(i.status==='resolved'||i.incidentType!=='blockage')continue;
+  const applies=i.travelMode==='all'||i.travelMode===S.mode;
+  if(i.status==='confirmed'&&applies)i.segmentIds.forEach(s=>excl.set(s,{i,why:'confirmed closure'}));
+  else if(S.avoid&&(applies||i.travelMode==='unknown')&&i.status!=='confirmed')i.segmentIds.forEach(s=>excl.has(s)||excl.set(s,{i,why:`${label(i.status).toLowerCase()} disruption avoided by your preference`}))}
+ if(S.exits)SEGS.filter(s=>s.a===S.origin||s.b===S.origin).forEach(s=>excl.set(s.id,{i:null,why:'“Block all exits” scenario (simulated)'}));
+ const current=S.origin===S.dest?null:dijkstra(new Set(excl.keys()));
+ const curSegs=new Set(current?current.segs:[]),origSegs=new Set(original?original.segs:[]);
+ const routeNodes=new Set([...(original?original.nodes:[]),...(current?current.nodes:[])]);
+ // Steps 4–5: relevance against the recommended route and the original route
+ for(const i of incs){
+  const onCur=i.segmentIds.some(s=>curSegs.has(s)),onOrig=i.segmentIds.some(s=>origSegs.has(s)),onRoute=onCur||onOrig;
+  const where=onCur?'your recommended route':'your original route';
+  const near=!onRoute&&i.segmentIds.some(s=>routeNodes.has(SEG[s].a)||routeNodes.has(SEG[s].b));
+  const modeApplies=i.travelMode==='all'||i.travelMode===S.mode,modeUnknown=i.travelMode==='unknown';
+  const timeKnown=i.freshness==='current';
+  const off=i.support.find(isAuth);
+  i.modeApp=modeUnknown?'Unknown — the reports do not say which travel mode is affected':modeApplies?`Applies to ${S.mode}`:`Does not apply to ${S.mode} (${i.travelMode} only)`;
+  i.timeApp=!timeKnown?'Unknown — reports are stale':off&&off.effectiveFrom!=null?`Active since ${fmt(off.effectiveFrom)} (official notice, no end time)`:'Observed within 15 min; your arrival time is not modelled';
+  i.appUnknown=modeUnknown||!timeKnown;
+  let rel,why;
+  if(i.status==='resolved'){rel='Unrelated';why='Resolved — no longer affects travel.'}
+  else if(!modeApplies&&!modeUnknown){rel='Unrelated';why=`Applies to ${i.travelMode} only; you are ${S.mode}. A ${i.travelMode} closure does not block ${S.mode}.`}
+  else if(onRoute&&(modeUnknown||!timeKnown)){rel='Potential';why=`On ${where}, but ${modeUnknown?'the affected travel mode is unknown':'its timing is uncertain (reports are stale)'}.`}
+  else if(onRoute){rel='Direct';why=`On ${where}, applies to ${S.mode}, and is active now. Arrival time is not modelled — we assume you leave now.`}
+  else if(near){rel='Nearby';why='Within one street of your route (demo assumption: one graph edge).'}
+  else{rel='Unrelated';why='Outside your route.'}
+  i.routeRelevance=rel;i.relWhy=why;
+  const block=i.incidentType==='blockage';
+  let p,act;
+  if(i.status==='resolved'||rel==='Unrelated'){p='P5';act='Keep in history'}
+  else if(rel==='Nearby'){p='P4';act='Monitor'}
+  else if(block&&i.status==='confirmed'&&rel==='Direct'){p='P1';act='Reroute'}
+  else if(block&&i.status==='corroborated'&&rel==='Direct'){p='P2';act='Recommend alternative route'}
+  else if(block){p='P2';act='Urgent review — uncertain blockage on your route'}
+  else{p='P3';act='Warn — possible delay or restricted passage'}
+  i.priority=p;i.recommendedAction=act;i.evidenceStatus=i.status;
+  i.onCurrent=onCur&&i.status!=='resolved';
+  i.causedDetour=onOrig&&i.segmentIds.some(s=>excl.has(s)&&excl.get(s).i===i);
+  const seq=onCur&&current?current.segs:original?original.segs:[];
+  i.pos=Math.min(...i.segmentIds.map(s=>{const k=seq.indexOf(s);return k<0?99:k}));
+  i.routeEffect=i.segmentIds.some(s=>excl.has(s)&&excl.get(s).i===i)?'Segment excluded from routing':rel==='Unrelated'?'None':'Kept in route (warning only)';i.explanation=i.note}
+ incs.sort((a,b)=>a.priority.localeCompare(b.priority)||a.pos-b.pos||(b.incidentType==='blockage')-(a.incidentType==='blockage'));
+ return{incs,original,current,excl}}
+const label=s=>({reported:'Reported',corroborated:'Corroborated',confirmed:'Officially confirmed',conflicting:'Conflicting',resolved:'Resolved'}[s]);
+const sym=s=>({reported:'◌',corroborated:'◉',confirmed:'■',conflicting:'⚠',resolved:'✓'}[s]);
+
+/* ===== Step 7: monitor & log ===== */
+function recompute(reason){
+ const E=evaluate();
+ for(const i of E.incs){
+  const now=`${label(i.status)} · ${i.routeRelevance} · ${i.priority}`,was=S.prev[i.id]||'—';
+  if(now!==was)S.log.unshift({timestamp:fmt(S.clock),incidentId:i.id,previousState:was,newState:now,evidenceIds:[...i.support,...i.contra].map(r=>r.id).join(', '),routeEffect:i.routeEffect,reason});
+  S.prev[i.id]=now}
+ const rk=E.current?E.current.segs.join('>'):'NONE';
+ if(S.prevRoute!==null&&rk!==S.prevRoute)S.log.unshift({timestamp:fmt(S.clock),incidentId:'ROUTE',previousState:S.prevRoute==='NONE'?'No route':'cost '+S.prevCost,newState:E.current?'cost '+E.current.cost:'No route',evidenceIds:[...E.excl.values()].map(x=>x.i?x.i.id:'scenario').filter((v,k,a)=>a.indexOf(v)===k).join(', ')||'—',routeEffect:E.current?'Recalculated route':'No route available',reason});
+ S.prevRoute=rk;S.prevCost=E.current?E.current.cost:null;
+ persist();render(E)}
+
+/* ===== Actions ===== */
+function addReport(r,reason){r.receivedAt=S.clock;r.validationFlags=validate(r);S.reports.push(r);
+ if(!r.validationFlags.includes('ambiguous-location')){const E=evaluate();const i=E.incs.find(i=>i.support.includes(r)||i.contra.includes(r));if(i)S.sel=i.id}
+ recompute(reason)}
+function nextEvent(){const ev=SCRIPT[S.step];if(!ev)return;S.clock=ev.at;S.step++;{const b=congBatch(S.step,ev.at);S.cong=(S.cong||[]).filter(c=>ev.at-c.observedAt<=60).concat(b);S.collected.congestion=(S.collected.congestion||0)+b.length-1}S.collected[ev.adapter]=(S.collected[ev.adapter]||0)+ev.reports.length;
+ ev.reports.forEach(r=>{S.lastRun={adapter:ADAPTERS[ev.adapter],label:ev.label,id:r.id};addReport(JSON.parse(JSON.stringify({...r,observedAt:ev.at})),`Agent run ${S.step} (${ADAPTERS[ev.adapter]}): ${ev.label}`)})}
+const TICK=7000;setInterval(()=>{if(!S.paused&&SCRIPT[S.step])nextEvent()},TICK);
+function togglePause(){S.paused=!S.paused;persist();render(evaluate())}
+addEventListener('keydown',e=>{if(e.shiftKey&&e.key==='P'&&!/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName))presenter.hidden=!presenter.hidden});
+function resetDemo(){S=fresh();try{localStorage.removeItem(KEY)}catch(e){}recompute('Demo reset');S.log=[];persist();render(evaluate())}
+function toggleExits(){S.exits=!S.exits;recompute(S.exits?'“Block all exits” scenario switched on':'“Block all exits” scenario switched off')}
+function setPref(k,v){S[k]=v;recompute(`Journey changed: ${k} → ${k==='origin'||k==='dest'?NODES[v].name:v}`)}
+function select(id){S.sel=id;persist();render(evaluate())}
+function selectSeg(segId){const E=evaluate();const i=E.incs.find(i=>i.segmentIds.includes(segId));S.sel=i?i.id:'SEG:'+segId;persist();render(E)}
+function togglePresent(){document.body.classList.toggle('present');presBtn.classList.toggle('on')}
+
+
+/* ===== Rendering ===== */
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function render(E){try{renderAll(E)}catch(err){console.error(err);document.getElementById('summary').innerHTML='<h3>Display error</h3><p class="muted">'+esc(err.message)+'. Use Presenter controls → Restart scenario (Shift+P).</p>'}}
+function renderAll(E){
+ document.getElementById('persist').textContent=canPersist?'':'Local storage unavailable — state will reset on reload.';
+ const oS=document.getElementById('origin');oS.innerHTML=dest.innerHTML='';NODES.forEach(n=>{oS.add(new Option(n.name,n.i));dest.add(new Option(n.name,n.i))});
+ oS.value=S.origin;dest.value=S.dest;mode.value=S.mode;avoid.checked=S.avoid;
+ clock.textContent=fmt(S.clock);
+ const STG=['Collect','Extract','Match','Evaluate evidence','Route relevance','Priority','Routing','Log'];
+ pipe.innerHTML=STG.map(x=>`<span class="${S.lastRun?'done':''}">${x}</span>`).join('<i>→</i>');
+ const more=SCRIPT[S.step];
+ nextDesc.innerHTML=S.lastRun?`<b>Last agent run ${fmt(S.clock)}:</b> ${esc(S.lastRun.adapter)} collected ${esc(S.lastRun.id)}: ${esc(S.lastRun.label)}. ${S.paused?'<b>Paused by presenter.</b>':more?'Agents are monitoring for new items.':'Monitoring. No new items from simulated sources.'}`:`Agents are starting the simulated source collectors${S.paused?' (paused by presenter)':''}…`;
+ adapters.innerHTML=Object.entries(ADAPTERS).map(([k,v])=>`<div class="adapter"><span><b>${v}</b><br><span class="note">Simulated · fictional data · runs automatically</span></span><span class="note">${S.collected[k]||0} item(s) collected</span></div>`).join('');
+ pauseBtn.textContent=S.paused?'Resume agents':'Pause agents';exitsBtn.classList.toggle('on',S.exits);exitsBtn.textContent=S.exits?'Unblock exits scenario':'Block all exits scenario';
+ drawMap(E);drawAlong(E);drawSummary(E);drawFeed(E);drawEvidence(E);drawTrace(E);drawQueue();drawLog()}
+function segState(E,id){const incs=E.incs.filter(i=>i.segmentIds.includes(id)&&i.status!=='resolved');
+ if(incs.some(i=>i.status==='confirmed'))return'confirmed';if(incs.length)return'uncertain';return''}
+function drawMap(E){
+ const sel=E.incs.find(i=>i.id===S.sel),selSegs=new Set(sel?sel.segmentIds:S.sel&&S.sel.startsWith('SEG:')?[S.sel.slice(4)]:[]);
+ const P=n=>NODES[n],line=(s,attrs)=>`<line x1="${P(s.a).x}" y1="${P(s.a).y}" x2="${P(s.b).x}" y2="${P(s.b).y}" ${attrs}/>`;
+ const C=congestion();congLegend.textContent=`Simulated probe readings · updated ${fmt(C.upd)}${C.dup?` · ${C.dup} duplicate reading(s) ignored`:''} · visual only, not added to route cost`;
+ let h='';
+ ROWS.forEach((r,k)=>h+=`<text x="12" y="${80+150*k+5}" font-size="14" font-weight="600" fill="#5B6B82">${r} St</text>`);
+ COLS.forEach((c,k)=>h+=`<text x="${110+200*k}" y="452" font-size="14" font-weight="600" fill="#5B6B82" text-anchor="middle">${c} Ave</text>`);
+ for(const s of SEGS){const lv=congLevel(C.by[s.id]);
+  if(selSegs.has(s.id))h+=line(s,'stroke="#14243A" stroke-width="26" stroke-linecap="round" opacity=".2"');
+  h+=line(s,`stroke="${CONG_COLOR[lv]}" stroke-width="18" stroke-linecap="round" ${lv==='stale'?'stroke-dasharray="2 6"':''}`);
+  const st=segState(E,s.id);
+  if(st==='confirmed')h+=line(s,'stroke="#7F1D1D" stroke-width="18" stroke-linecap="butt"')+line(s,'stroke="#fff" stroke-width="5" stroke-dasharray="7 7"');
+  else if(st==='uncertain')h+=line(s,'stroke="#14243A" stroke-width="3" stroke-dasharray="5 6"')}
+ const pl=r=>r.nodes.map(n=>`${P(n).x},${P(n).y}`).join(' ');
+ if(E.original&&(!E.current||E.current.segs.join()!==E.original.segs.join()))h+=`<polyline points="${pl(E.original)}" fill="none" stroke="#475569" stroke-width="4" stroke-dasharray="2 9" stroke-linecap="round" stroke-linejoin="round"/>`;
+ if(E.current)h+=`<polyline points="${pl(E.current)}" fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/><polyline points="${pl(E.current)}" fill="none" stroke="#2563EB" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>`;
+ for(const s of SEGS)h+=`<g class="seg" tabindex="0" role="button" aria-label="${s.name}" onclick="selectSeg('${s.id}')" onkeydown="if(event.key==='Enter')selectSeg('${s.id}')">${line(s,'stroke="transparent" stroke-width="30"')}<title>${s.name} (${s.id}) · demo cost ${s.cost} · congestion: ${CONG_TEXT(C.by[s.id])}</title></g>`;
+ for(const n of NODES){const o=n.i===S.origin,d=n.i===S.dest;
+  h+=`<circle cx="${n.x}" cy="${n.y}" r="${o||d?13:7}" fill="${o?'#14243A':d?'#2563EB':'#fff'}" stroke="${o||d?'#fff':'#94A3B8'}" stroke-width="3"/>`;
+  if(o||d){const lbl=o?'Start':'End';h+=`<rect x="${n.x-30}" y="${n.y-46}" width="60" height="24" rx="6" fill="${o?'#14243A':'#2563EB'}"/><text x="${n.x}" y="${n.y-29}" text-anchor="middle" font-size="14" font-weight="700" fill="#fff">${lbl}</text>`}}
+ // clickable incident markers (on top)
+ for(const s of SEGS){const inc=E.incs.find(i=>i.segmentIds.includes(s.id)&&i.status!=='resolved');if(!inc)continue;
+  const conf=inc.status==='confirmed',mx=(P(s.a).x+P(s.b).x)/2,my=(P(s.a).y+P(s.b).y)/2,tag=conf?(inc.travelMode==='all'?'CLOSED':'CLOSED · '+inc.travelMode.toUpperCase()):'UNVERIFIED',w=tag.length*8+14;
+  h+=`<g class="seg" tabindex="0" role="button" aria-label="${s.name}: ${label(inc.status)}" onclick="select('${inc.id}')" onkeydown="if(event.key==='Enter')select('${inc.id}')">
+   ${conf?`<circle cx="${mx}" cy="${my}" r="16" fill="#B91C1C" stroke="#fff" stroke-width="3"/><text x="${mx}" y="${my+6}" text-anchor="middle" font-size="18" font-weight="800" fill="#fff">✕</text>`
+        :`<circle cx="${mx}" cy="${my}" r="16" fill="#fff" stroke="#B45309" stroke-width="3" stroke-dasharray="5 4"/><text x="${mx}" y="${my+6}" text-anchor="middle" font-size="18" font-weight="800" fill="#B45309">?</text>`}
+   <rect x="${s.h?mx-w/2:mx-22-w}" y="${s.h?my+20:my-11}" width="${w}" height="22" rx="5" fill="${conf?'#B91C1C':'#FFFBEB'}" stroke="${conf?'#B91C1C':'#B45309'}"/><text x="${s.h?mx:mx-22-w/2}" y="${s.h?my+36:my+5}" text-anchor="middle" font-size="13" font-weight="700" fill="${conf?'#fff':'#92400E'}">${tag}</text>
+   <title>${inc.id}: ${label(inc.status)} — click for evidence</title></g>`}
+ map.innerHTML=h}
+function drawSummary(E){
+ const el=document.getElementById('summary');el.className='summary';
+ if(S.origin===S.dest){el.innerHTML='<h3>Choose a different destination</h3><p class="muted">Origin and destination are the same intersection.</p>';return}
+ if(!E.current){el.classList.add('empty');const why=[...E.excl.entries()].map(([s,x])=>`<li><b>${SEG[s].name}</b> — ${esc(x.why)}${x.i?` (${x.i.id})`:''}</li>`).join('');
+  el.innerHTML=`<h3>✕ No route available</h3><p style="margin:4px 0">Every path from ${esc(NODES[S.origin].name)} to ${esc(NODES[S.dest].name)} crosses an excluded segment. We're not drawing a route that doesn't exist.</p><ul style="margin:6px 0 0;padding-left:20px">${why}</ul><p class="muted" style="margin-top:8px">Try: ${S.exits?'turn off “Block all exits”, ':''}${S.avoid?'turn off “Avoid uncertain reports”, ':''}change travel mode or destination.</p>`;return}
+ const changed=E.original&&E.current.segs.join()!==E.original.segs.join();
+ const causes=[...new Map([...E.excl.entries()].filter(([s])=>E.original.segs.includes(s)).map(([s,x])=>[s,x])).entries()];
+ const warn=E.incs.filter(i=>i.status!=='resolved'&&i.routeRelevance!=='Unrelated'&&!i.segmentIds.some(s=>E.excl.has(s))&&i.segmentIds.some(s=>E.current.segs.includes(s)));
+ el.innerHTML=`<h3>${changed?'↻ Route changed':'✓ Original route is clear to use'}</h3>
+ <p style="margin:4px 0">${changed?causes.map(([s,x])=>`Avoiding <b>${SEG[s].name}</b> — ${esc(x.why)}${x.i?` (${x.i.id}; evidence ${[...new Set(x.i.sup.map(g=>g.first.id))].join(', ')})`:''}.`).join(' '):'No excluded segments on your route.'}</p>
+ ${warn.length?`<p style="margin:6px 0;color:var(--amber);font-weight:600">⚠ Still on your route: ${warn.map(i=>`${SEG[i.segmentIds[0]].name} — ${label(i.status)}, not confirmed${S.avoid?'':' (turn on “Avoid uncertain reports” to route around it)'}`).join('; ')}.</p>`:''}
+ <div class="costs"><span>Original route: <b>${E.original.cost}</b> demo route cost</span><span>Recommended route: <b>${E.current.cost}</b> demo route cost</span><span>Via ${E.current.segs.length} segments</span></div>
+ <p class="note" style="margin:6px 0 0">Demo route cost is a relative unit on the schematic network — not minutes or distance.</p>`}
+function incCard(i){const s=SEG[i.segmentIds[0]];return`<button class="inc bl-${i.status} ${S.sel===i.id?'sel':''}" onclick="select('${i.id}')">
+ <span class="t"><span>${esc(s.name)}</span><span class="prio ${i.priority}">${i.priority}</span></span>
+ <span class="st st-${i.status}">${sym(i.status)} ${label(i.status)}</span> <span class="s">· ${i.incidentType} · ${i.travelMode==='all'?'all modes':i.travelMode} · ${i.routeRelevance}</span>
+ <span class="s" style="display:block">${esc(i.recommendedAction)} · ${i.sup.length} independent source${i.sup.length===1?'':'s'}</span></button>`}
+function drawAlong(E){
+ const el=document.getElementById('along');
+ if(!E.current){el.innerHTML='<p class="muted">No route available, so there is nothing to check along it. See the route explanation.</p>';return}
+ const on=E.incs.filter(i=>i.onCurrent).sort((a,b)=>a.priority.localeCompare(b.priority)||a.pos-b.pos);
+ const det=E.incs.filter(i=>i.causedDetour);
+ const latest=i=>Math.max(...[...i.support,...i.contra].map(r=>r.observedAt));
+ let h=on.map(i=>{const s=SEG[i.segmentIds[0]],lt=latest(i),conf=i.status==='confirmed';return`<button class="along bl-${i.status} ${S.sel===i.id?'sel':''}" onclick="select('${i.id}')">
+  <span class="row1"><span>${conf?'✕':'?'} ${i.incidentType==='blockage'?'Blockage':'Restriction'} · ${esc(s.name)}</span><span class="prio ${i.priority}">${i.priority}</span></span>
+  <span class="st st-${i.status}">${sym(i.status)} ${label(i.status)}${conf?'':' — not confirmed'}</span>
+  <dl><dt>Observed</dt><dd>${fmt(lt)} (${S.clock-lt} min ago) · ${i.freshness==='current'?'current':'stale'}</dd>
+  <dt>Relevance</dt><dd>${i.routeRelevance}${i.appUnknown?' · <span class="flagu">applicability unknown</span>':''}</dd>
+  <dt>Mode / time</dt><dd>${esc(i.modeApp)}; ${esc(i.timeApp)}</dd>
+  <dt>Action</dt><dd>${esc(i.recommendedAction)}</dd>
+  <dt>Sources</dt><dd>${i.sup.map(g=>esc(g.first.sourceReference)).join('; ')}</dd></dl></button>`}).join('');
+ if(!on.length)h+='<p class="muted" style="margin:6px 0 0">✓ Agents found no active incidents on your recommended route.</p>';
+ if(det.length)h+=`<p class="note" style="margin:10px 0 0"><b>Detour cause (no longer on your route):</b> ${det.map(i=>`<a href="#" onclick="select('${i.id}');return false">${i.id} · ${esc(SEG[i.segmentIds[0]].name)} · ${label(i.status)}</a>`).join('; ')}</p>`;
+ el.innerHTML=h}
+function drawFeed(E){feed.innerHTML=E.incs.length?E.incs.map(incCard).join(''):'<p class="muted">No incidents yet. Agents are collecting from the simulated sources.</p>'}
+function srcLine(g){const r=g.first;return`<div class="src">${isAuth(r)?'🏛 ':'• '}<b>${esc(r.sourceReference)}</b> <i>· ${r.id} · observed ${fmt(r.observedAt)} (${S.clock-r.observedAt} min ago)${r.sourceType==='public'&&S.clock-r.observedAt>WINDOW?' · stale':''}${isAuth(r)?' · simulated authority':''}${r.claimedOfficial?' · claims official, not authenticated':''}${g.copies.length>1?` · ${g.copies.length} copies counted once (${g.copies.map(c=>c.id).join(', ')})`:''}</i><br>“${esc(r.originalText)}”</div>`}
+function drawEvidence(E){
+ const el=document.getElementById('evidence');
+ if(S.sel&&S.sel.startsWith('SEG:')){const s=SEG[S.sel.slice(4)];el.innerHTML=`<h3>${esc(s.name)}</h3><p class="muted">Segment ${s.id} · demo cost ${s.cost}. No incident reports about this segment.</p><p style="margin:6px 0 0"><b>Congestion:</b> ${esc(CONG_TEXT(congestion().by[s.id]))}</p><p class="note">Congestion is shown separately from incident evidence and is not added to route cost.</p>`;return}
+ const i=E.incs.find(i=>i.id===S.sel)||E.incs.find(i=>i.priority!=='P5')||null;
+ if(!i){el.innerHTML='<h3>Evidence</h3><p class="muted">Select an incident or a street segment to see its evidence.</p>';return}
+ const s=SEG[i.segmentIds[0]];
+ el.innerHTML=`<h3>${esc(s.name)} <span class="note">· ${i.id}</span></h3>
+ <div class="lead"><span class="st st-${i.status}">${sym(i.status)} ${label(i.status)}</span><br>${esc(i.note)}</div>
+ <dl><dt>Claimed</dt><dd>${i.incidentType==='blockage'?'Street blocked':'Restricted passage / delay'}</dd>
+ <dt>Segment &amp; mode</dt><dd>${s.id} · ${i.travelMode==='all'?'all modes':i.travelMode==='unknown'?'mode unknown':i.travelMode+' only'}</dd>
+ <dt>Applicability</dt><dd>${esc(i.modeApp)}; ${esc(i.timeApp)}</dd>
+ <dt>Supporting</dt><dd>${i.sup.map(srcLine).join('')||'None'}</dd>
+ <dt>Conflicting</dt><dd>${i.con.map(srcLine).join('')||'None'}</dd>
+ <dt>Freshness</dt><dd>${i.freshness==='current'?'Current':'Stale — older than 15 min (demo rule); not proof of reopening'}</dd>
+ <dt>Route relevance</dt><dd><b>${i.routeRelevance}</b> — ${esc(i.relWhy)}</dd>
+ <dt>Priority</dt><dd><span class="prio ${i.priority}">${i.priority}</span> ${esc(i.recommendedAction)}</dd>
+ <dt>Route effect</dt><dd>${esc(i.routeEffect)}</dd>
+ <dt>Congestion</dt><dd>${esc(CONG_TEXT(congestion().by[i.segmentIds[0]]))} <span class="note">(separate signal; not incident evidence)</span></dd></dl>`}
+function drawTrace(E){
+ const i=E.incs.find(i=>i.id===S.sel)||E.incs.find(i=>i.priority!=='P5');
+ if(!i){trace.innerHTML='<li><span></span><span class="muted">Nothing to trace yet — add a report.</span></li>';return}
+ const all=[...i.support,...i.contra],flags=[...new Set(all.flatMap(r=>r.validationFlags))];
+ const rows=[
+  ['Extract & validate',`${all.length} report(s) on known segment ${i.segmentIds.join(', ')}. Mode: ${i.travelMode}. ${flags.length?'Flags: '+flags.join(', ')+'.':'No validation flags.'}`],
+  ['Match incidents',i.match.join('. ')+'. Duplicates grouped by original post ID.'],
+  ['Compare evidence',`${label(i.status)}: ${i.note} Supporting independent sources: ${i.sup.length}; conflicting: ${i.con.length}.`],
+  ['Check route relevance',`${i.routeRelevance}: ${i.relWhy}`],
+  ['Prioritize',`${i.priority} — ${i.recommendedAction}. ${({P1:'Confirmed blockage directly on your route.',P2:i.status==='corroborated'?'Corroborated but not official blockage on your route.':'Blockage on your route that is not yet verified — needs review; it is not treated as confirmed.',P3:'Restriction on your route.',P4:'Close to your route.',P5:'Resolved or not on your route.'})[i.priority]}`],
+  ['Update routing',`${i.routeEffect}. ${i.status==='confirmed'?'Confirmed closures for your mode are always excluded.':i.status==='resolved'?'Segment restored to the network.':S.avoid?'Your “avoid uncertain” preference is on.':'Uncertain reports only warn unless you turn on “Avoid uncertain reports”.'}`],
+  ['Monitor & log',`Reassessed at ${fmt(S.clock)}. New evidence, reopening notices, mode/destination changes and freshness changes trigger another pass.`]];
+ trace.innerHTML=rows.map(([a,b])=>`<li><b>${a}</b><span>${esc(b)}</span></li>`).join('')}
+function drawQueue(){const q=S.reports.filter(r=>r.validationFlags.includes('ambiguous-location'));
+ queue.innerHTML=q.length?q.map(r=>`<div class="queue-item"><b>${r.id}</b> · ${esc(r.sourceReference)} · ${fmt(r.observedAt)}<br>“${esc(r.originalText)}”<br><span class="note">Location too broad to match a segment. Held by the agent; not used for routing.</span>
+ </div>`).join(''):'<p class="muted">Queue is empty.</p>'}
+function drawLog(){log.innerHTML=S.log.map(l=>`<tr><td>${l.timestamp}</td><td>${l.incidentId}</td><td>${esc(l.previousState)} → <b>${esc(l.newState)}</b></td><td>${esc(l.evidenceIds)}</td><td>${esc(l.routeEffect)}</td><td>${esc(l.reason)}</td></tr>`).join('')||'<tr><td colspan="6" class="muted">No decisions logged yet.</td></tr>'}
+recompute(S.log.length?'Page reloaded':'Initial route calculated');
+{if(/presenter/.test(location.hash))presenter.hidden=false;const m=location.hash.match(/step=(\d)/);if(m){resetDemo();for(let k=0;k<+m[1];k++)nextEvent()}}
+</script></body></html>
